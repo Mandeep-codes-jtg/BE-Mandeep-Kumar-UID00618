@@ -20,23 +20,20 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('first_name', 'last_name', 'email')
 
 class TodoSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(write_only=True)
-
     class Meta:
         model = Todo
-        fields = ['id', 'user_id', 'name', 'done', 'date_created']
+        fields = ['id', 'name', 'done', 'date_created']
         read_only_fields = ['id', 'date_created']
-
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        request = self.context.get('request')
         return {
             "todo_id": rep["id"],
             "name": rep["name"],
             "done": rep["done"],
             "date_created": rep["date_created"]
         }
+
 
 class TodoSerializer1(serializers.ModelSerializer):
     creator = UserSerializer(source='user')  # map 'user' FK to 'creator'

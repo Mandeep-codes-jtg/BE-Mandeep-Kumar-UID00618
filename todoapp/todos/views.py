@@ -1,11 +1,10 @@
 from rest_framework.viewsets import ModelViewSet
 from .models import Todo
-from rest_framework import viewsets, mixins, status
+from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from .serializers import TodoSerializer
-from rest_framework.permissions import AllowAny
-
+from rest_framework.permissions import IsAuthenticated
 
 
 class TodoPagination(PageNumberPagination):
@@ -13,34 +12,27 @@ class TodoPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
 
 class TodoAPIViewSet(ModelViewSet):
-    """
-        success response for create/update/get
-        {
-          "name": "",
-          "done": true/false,
-          "date_created": ""
-        }
-
-        success response for list
-        [
-          {
-            "name": "",
-            "done": true/false,
-            "date_created": ""
-          }
-        ]
-    """
     serializer_class = TodoSerializer
     pagination_class = TodoPagination
-    permission_classes = [AllowAny]
-
+    permission_classes = [IsAuthenticated] 
 
     def get_queryset(self):
-        user_id = self.request.query_params.get('user_id')
-        if user_id:
-            return Todo.objects.filter(user_id=user_id).order_by('-date_created')
-        return Todo.objects.all().order_by('-date_created')
-    
+        return Todo.objects.filter(user=self.request.user).order_by('-date_created')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.user != request.user:
+            return Response({'detail': 'You do not have permission to edit this todo.'}, status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.user != request.user:
+            return Response({'detail': 'You do not have permission to delete this todo.'}, status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
     
 
 
