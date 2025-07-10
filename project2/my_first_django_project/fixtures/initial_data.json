@@ -1,0 +1,19 @@
+[
+  {
+    "model": "myapp.book",
+    "pk": 1,
+    "fields": {
+      "title": "To Kill a Mockingb",
+      "pages": 3
+    }
+  },
+  {
+    "model": "myapp.book",
+    "pk": 2,
+    "fields": {
+      "title": "1984",
+      "pages": 4
+    }
+  }
+]
+
