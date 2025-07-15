@@ -61,6 +61,16 @@ class UserWithTodoSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id','first_name','last_name','email','completed_count','pending_count')
 
+class UserWithTodoSerializer2(serializers.ModelSerializer):
+
+    completed_count = serializers.IntegerField()
+    pending_count = serializers.IntegerField()
+
+    class Meta:
+        model = User
+        fields = ('first_name','last_name','email','pending_count','completed_count')
+
+
 class UserPendingCountSerializer(serializers.ModelSerializer):
 
     pending_count = serializers.IntegerField()
@@ -72,7 +82,7 @@ class UserPendingCountSerializer(serializers.ModelSerializer):
 
 class ProjectReportSerializer(serializers.Serializer):
     project_title = serializers.CharField(source='name')
-    report = UserWithTodoSerializer(many=True)
+    report = UserWithTodoSerializer2(many=True)
 
     class Meta:
         model = Project

@@ -3,10 +3,12 @@ from django.contrib import admin
 
 api_urls = [
     path('todos/', include('todos.urls')),
-    path('', include('users.urls')),
+    path('', include('users.urls', namespace='users')),
+    path('', include('projects.urls', namespace='projects'))
 ]
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(api_urls)),
+    path('api/', include(api_urls))
 ]
+

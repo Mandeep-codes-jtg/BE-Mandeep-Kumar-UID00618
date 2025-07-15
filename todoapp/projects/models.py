@@ -2,8 +2,8 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.conf import settings
-from users.models import CustomUser as User
 
+User = get_user_model()
 
 class Project(models.Model):
     """
@@ -41,8 +41,8 @@ class ProjectMember(models.Model):
     Add string representation for this model with project name and user email/first name.
     """
 
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    member = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE,)
+    member = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ('project','member')

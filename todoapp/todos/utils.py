@@ -3,7 +3,8 @@ from .models import Todo
 from users.models import CustomUser as User
 from .serializers import TodoSerializer1, UserWithTodoSerializer, UserPendingCountSerializer, ProjectReportSerializer, UserProjectStatusSerializer
 from django.db.models import Count, Q, Prefetch
-from projects.models import Project, ProjectMember
+from projects.models import Project
+from django.contrib.postgres.aggregates import ArrayAgg
 
 
 # Add code to this util to return all users list in specified format.
@@ -335,37 +336,30 @@ def fetch_project_wise_report():
 # Note: Use serializer for generating this format.
 # use json.load(json.dumps(serializer.data)) while returning data from this function for test cases to pass.
 # Hint: Use subquery/aggregation for project data.
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.db.models import Q
+
 def fetch_user_wise_project_status():
     """
     Util to fetch user wise project statuses.
     :return: list of dicts - List of user project data
     """
-    users = User.objects.prefetch_related('project_working_on')
+    users = User.objects.annotate(
+        to_do_projects=ArrayAgg(
+            'project_working_on__name',
+            filter=Q(project_working_on__status=Project.StatusChoices.TO_BE_STARTED)
+        ),
+        in_progress_projects=ArrayAgg(
+            'project_working_on__name',
+            filter=Q(project_working_on__status=Project.StatusChoices.IN_PROGRESS)
+        ),
+        completed_projects=ArrayAgg(
+            'project_working_on__name',
+            filter=Q(project_working_on__status=Project.StatusChoices.COMPLETED)
+        ),
+    )
 
-    result = []
-    for user in users:
-        to_do_projects = []
-        in_progress_projects = []
-        completed_projects = []
-
-        for project in user.project_working_on.all():
-            if project.status == Project.StatusChoices.TO_BE_STARTED:
-                to_do_projects.append(project.name)
-            elif project.status == Project.StatusChoices.IN_PROGRESS:
-                in_progress_projects.append(project.name)
-            elif project.status == Project.StatusChoices.COMPLETED:
-                completed_projects.append(project.name)
-
-        result.append({
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "email": user.email,
-            "to_do_projects": sorted(to_do_projects),
-            "in_progress_projects": sorted(in_progress_projects),
-            "completed_projects": sorted(completed_projects),
-        })
-
-    serializer = UserProjectStatusSerializer(result, many=True)
-    return json.loads(json.dumps(serializer.data))
     
 
+    serializer = UserProjectStatusSerializer(users, many=True)
+    return json.loads(json.dumps(serializer.data))
