@@ -1,9 +1,6 @@
-from __future__ import unicode_literals
-
-from django.db import models
-from django.utils.encoding import smart_str as smart_unicode
-from django.utils.translation import gettext_lazy as _
 from django.conf import settings
+from django.db import models
+
 
 class Todo(models.Model):
     """
@@ -25,5 +22,3 @@ class Todo(models.Model):
 
     def __str__(self):
         return self.name
-
-    

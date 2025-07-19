@@ -1,5 +1,6 @@
-from django.urls import include, path
 from django.contrib import admin
+from django.urls import include, path
+
 
 api_urls = [
     path('todos/', include('todos.urls')),
