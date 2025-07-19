@@ -1,5 +1,5 @@
 from rest_framework.viewsets import ModelViewSet
-from .models import Todo
+from todos.models import Todo
 from rest_framework import viewsets, mixins, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -9,8 +9,12 @@ from rest_framework.permissions import AllowAny
 
 
 class TodoPagination(PageNumberPagination):
+    """
+    Class to add pagination in Todo list
+    """
     page_size = 5
     page_size_query_param = 'page_size'
+
 
 class TodoAPIViewSet(ModelViewSet):
     """

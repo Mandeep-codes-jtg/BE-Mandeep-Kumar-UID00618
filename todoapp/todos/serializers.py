@@ -20,7 +20,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('first_name', 'last_name', 'email')
 
 class TodoSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = Todo
@@ -30,7 +29,6 @@ class TodoSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        request = self.context.get('request')
         return {
             "todo_id": rep["id"],
             "name": rep["name"],
