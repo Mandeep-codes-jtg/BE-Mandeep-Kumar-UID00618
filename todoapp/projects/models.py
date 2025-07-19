@@ -1,5 +1,8 @@
-
+from django.conf import settings
 from django.db import models
+from django.contrib.auth import get_user_model
+
+from users.models import CustomUser as User
 
 
 class Project(models.Model):
@@ -12,7 +15,21 @@ class Project(models.Model):
 
         Add string representation for this model with project name.
     """
+    class StatusChoices(models.IntegerChoices):
+        TO_BE_STARTED = 0, "To be started"
+        IN_PROGRESS = 1, "In progress"
+        COMPLETED = 2, "Completed"
 
+    members = models.ManyToManyField(User, through='ProjectMember', related_name="project_working_on")
+    name = models.CharField(max_length=100)
+    max_members = models.PositiveSmallIntegerField()
+    status = models.IntegerField(
+        choices = StatusChoices.choices,
+        default = StatusChoices.TO_BE_STARTED,
+    )
+
+    def __str__(self):
+        return self.name
 
 class ProjectMember(models.Model):
     """
@@ -24,4 +41,14 @@ class ProjectMember(models.Model):
     Add string representation for this model with project name and user email/first name.
     """
 
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    member = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('project','member')
+
+    def __str__(self):
+        return self.member.first_name
+
+  
 

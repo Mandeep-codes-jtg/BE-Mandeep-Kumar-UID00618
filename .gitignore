@@ -1,0 +1,8 @@
+.venv/
+project1/.venv
+project2/.venv
+*.pyc
+project2/my_first_django_project/my_first_django_project/.env
+project2/my_first_django_project/myapp/migrations/0001_initial.py
+project2/my_first_django_project/myapp/migrations/0002_book_delete_mymodel.py
+project2/my_first_django_project/myapp/migrations/0003_alter_book_title.py
