@@ -1,23 +1,19 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from .models import Todo
-from users.models import CustomUser as User
+
 from projects.models import Project
-from django.db.models import Count, Q
-
-
-# Add your serializer(s) here
-
-# class TodoSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Todo
-#         fields = '__all__'
+from users.models import CustomUser as User
+from todos.models import Todo
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for basic user details
+    """
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email')
+
 
 class TodoSerializer(serializers.ModelSerializer):
 
@@ -36,7 +32,11 @@ class TodoSerializer(serializers.ModelSerializer):
             "date_created": rep["date_created"]
         }
 
+
 class TodoSerializer1(serializers.ModelSerializer):
+    """
+    Serializer for Todo updated according to request-response format
+    """
     creator = UserSerializer(source='user')  # map 'user' FK to 'creator'
 
     status = serializers.SerializerMethodField()
@@ -54,6 +54,10 @@ class TodoSerializer1(serializers.ModelSerializer):
 
 
 class UserWithTodoSerializer(serializers.ModelSerializer):
+    """
+    Serializer for all user details including their
+    completed_count and pending_count for users.
+    """
 
     completed_count = serializers.IntegerField()
     pending_count = serializers.IntegerField()
@@ -62,7 +66,11 @@ class UserWithTodoSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id','first_name','last_name','email','completed_count','pending_count')
 
+
 class UserPendingCountSerializer(serializers.ModelSerializer):
+    """
+    Serializer for all user details including their pending todo counts.
+    """
 
     pending_count = serializers.IntegerField()
 
@@ -72,6 +80,9 @@ class UserPendingCountSerializer(serializers.ModelSerializer):
 
 
 class ProjectReportSerializer(serializers.Serializer):
+    """
+    Serializer for Projects including data of all members project-wise
+    """
     project_title = serializers.CharField(source='name')
     report = UserWithTodoSerializer(many=True)
 
@@ -80,36 +91,10 @@ class ProjectReportSerializer(serializers.Serializer):
         fields = ('project_title','report')
 
 
-
-# class Serializer5(serializers.ModelSerializer):
-#     completed_count=serializers.IntegerField(read_only=True)
-#     pending_count=serializers.IntegerField(read_only=True)
-#     class Meta:
-#         model=User
-#         fields=['first_name','last_name','email','completed_count','pending_count']
-
-# class projectSerializer(serializers.ModelSerializer):
-#     project_title=serializers.CharField(source='name')
-#     report=serializers.SerializerMethodField()
-
-#     class Meta:
-#         model=Project
-#         fields=['project_title','report']
-
-#     def get_report(self,obj):
-#         datauser=obj.members.annotate(
-#             completed_count=Count('todo', filter=Q(todo__done=True)),
-#             pending_count=Count('todo', filter=Q(todo__done=False))
-#         )
-#         return Serializer5(datauser,many=True).data
-    
-# class Serializer6(serializers.ModelSerializer):
-#     class Meta:
-#         model=Project
-#         fields=['name','max_members']
-
-
 class UserProjectStatusSerializer(serializers.Serializer):
+    """
+    Serializer for user details including all their projects with status.
+    """
     first_name = serializers.CharField()
     last_name = serializers.CharField()
     email = serializers.EmailField()

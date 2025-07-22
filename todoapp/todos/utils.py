@@ -1,10 +1,18 @@
 import json
-from .models import Todo
-from users.models import CustomUser as User
-from .serializers import TodoSerializer1, UserWithTodoSerializer, UserPendingCountSerializer, ProjectReportSerializer, UserProjectStatusSerializer
-from django.db.models import Count, Q, Prefetch
-from projects.models import Project, ProjectMember
 
+from django.db.models import Count, Q, Prefetch
+
+from projects.models import Project
+from todos.models import Todo
+from users.models import CustomUser as User
+
+from .serializers import (
+    TodoSerializer1, 
+    UserWithTodoSerializer, 
+    UserPendingCountSerializer, 
+    ProjectReportSerializer, 
+    UserProjectStatusSerializer,
+)
 
 # Add code to this util to return all users list in specified format.
 # [ {
@@ -291,13 +299,6 @@ def fetch_project_wise_report():
     :return: list of dicts - List of report data
     """
 
-
-    # projects = Project.objects.annotate(
-    #     report=
-    # )
-    # serializer = ProjectReportSerializer(projects, many=True)
-    # return json.loads(json.dumps(serializer.data))
-
     users_with_todo_stats = User.objects.annotate(
         pending_count=Count('todo', filter=Q(todo__done=False)),
         completed_count=Count('todo', filter=Q(todo__done=True))
@@ -344,17 +345,11 @@ def fetch_user_wise_project_status():
 
     result = []
     for user in users:
-        to_do_projects = []
-        in_progress_projects = []
-        completed_projects = []
+        user_projects = user.project_working_on.all()
 
-        for project in user.project_working_on.all():
-            if project.status == Project.StatusChoices.TO_BE_STARTED:
-                to_do_projects.append(project.name)
-            elif project.status == Project.StatusChoices.IN_PROGRESS:
-                in_progress_projects.append(project.name)
-            elif project.status == Project.StatusChoices.COMPLETED:
-                completed_projects.append(project.name)
+        to_do_projects = user_projects.filter(status=Project.StatusChoices.TO_BE_STARTED).values_list('name', flat=True)
+        in_progress_projects = user_projects.filter(status=Project.StatusChoices.IN_PROGRESS).values_list('name', flat=True)
+        completed_projects = user_projects.filter(status=Project.StatusChoices.COMPLETED).values_list('name', flat=True)
 
         result.append({
             "first_name": user.first_name,
